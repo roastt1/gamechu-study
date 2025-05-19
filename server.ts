@@ -15,10 +15,14 @@ const io = new Server(server);
 app.prepare().then(() => {
     io.on('connection', (socket: Socket) => {
         console.log('a user connected');
+        socket.on('join room', (roomId: string) => {
+            socket.join(roomId);
+            console.log(`user joined room ${roomId}`);
+        });
 
-        socket.on('chat message', (msg: { nickname: string; text: string }) => {
-            console.log(`${msg.nickname}: ${msg.text}`);
-            socket.broadcast.emit('chat message', msg);
+        socket.on('chat message', (msg: { roomId: string; nickname: string; text: string }) => {
+            console.log(`${msg.roomId}/${msg.nickname}: ${msg.text}`);
+            socket.to(msg.roomId).emit('chat message', msg);
         });
 
         socket.on('disconnect', () => {
